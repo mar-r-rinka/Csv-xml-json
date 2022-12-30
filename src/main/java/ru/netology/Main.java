@@ -1,7 +1,6 @@
 package ru.netology;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
@@ -27,7 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Main {
-    public static void main(String[] args) throws ParserConfigurationException, TransformerException, IOException {
+    public static void main(String[] args) {
         String[] columnMapping = {"id", "firstName", "lastName", "country", "age"};
         String fileName = "data.csv";
         List<String[]> employee = new ArrayList<>();
@@ -55,44 +54,49 @@ public class Main {
         }
 
         String json = readString("new_data.json");
-        //       List<Employee> listFromJson = jsonToList(json);
+        System.out.println(jsonToList(json));
 
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        Document doc = builder.newDocument();
+        try {
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document doc = builder.newDocument();
 
-        Element root = doc.createElement("staff");
-        doc.appendChild(root);
-        for (Employee emp : employeesCSV) {
-            Element empl = doc.createElement("employee");
-            root.appendChild(empl);
-            Element id = doc.createElement("id");
-            id.appendChild(doc.createTextNode(Integer.toString((int) emp.id)));
-            empl.appendChild(id);
-            Element firstName = doc.createElement("firstName");
-            firstName.appendChild(doc.createTextNode(emp.firstName));
-            empl.appendChild(firstName);
-            Element lastName = doc.createElement("lastName");
-            lastName.appendChild(doc.createTextNode(emp.lastName));
-            empl.appendChild(lastName);
-            Element country = doc.createElement("country");
-            country.appendChild(doc.createTextNode(emp.country));
-            empl.appendChild(country);
-            Element age = doc.createElement("age");
-            age.appendChild(doc.createTextNode(Integer.toString(emp.age)));
-            empl.appendChild(age);
+            Element root = doc.createElement("staff");
+            doc.appendChild(root);
+            for (Employee emp : employeesCSV) {
+                Element empl = doc.createElement("employee");
+                root.appendChild(empl);
+                Element id = doc.createElement("id");
+                id.appendChild(doc.createTextNode(Integer.toString((int) emp.id)));
+                empl.appendChild(id);
+                Element firstName = doc.createElement("firstName");
+                firstName.appendChild(doc.createTextNode(emp.firstName));
+                empl.appendChild(firstName);
+                Element lastName = doc.createElement("lastName");
+                lastName.appendChild(doc.createTextNode(emp.lastName));
+                empl.appendChild(lastName);
+                Element country = doc.createElement("country");
+                country.appendChild(doc.createTextNode(emp.country));
+                empl.appendChild(country);
+                Element age = doc.createElement("age");
+                age.appendChild(doc.createTextNode(Integer.toString(emp.age)));
+                empl.appendChild(age);
+
+            }
+            DOMSource domSource = new DOMSource(doc);
+            StreamResult streamResult = new StreamResult(new File("data.xml"));
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            transformer.transform(domSource, streamResult);
+
+            List<Employee> list = parseXML("data.xml");
+            System.out.println(list);
+        } catch (ParserConfigurationException | TransformerException ex) {
+            ex.printStackTrace();
 
         }
 
-        DOMSource domSource = new DOMSource(doc);
-        StreamResult streamResult = new StreamResult(new File("data.xml"));
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-        Transformer transformer = transformerFactory.newTransformer();
-        transformer.transform(domSource, streamResult);
-
-        List<Employee> list = parseXML("data.xml");
-        System.out.println(list);
 
     }
 
@@ -133,11 +137,11 @@ public class Main {
             NodeList employeeList = root.getChildNodes();
             for (int i = 0; i < employeeList.getLength(); i++) {
 
-                long id = Long.parseLong(doc.getElementsByTagName("id").item(0).getTextContent());
-                String firstName = doc.getElementsByTagName("firstName").item(0).getTextContent();
-                String lastName = doc.getElementsByTagName("lastName").item(0).getTextContent();
-                String country = doc.getElementsByTagName("country").item(0).getTextContent();
-                int age = Integer.parseInt(doc.getElementsByTagName("age").item(0).getTextContent());
+                long id = Long.parseLong(doc.getElementsByTagName("id").item(i).getTextContent());
+                String firstName = doc.getElementsByTagName("firstName").item(i).getTextContent();
+                String lastName = doc.getElementsByTagName("lastName").item(i).getTextContent();
+                String country = doc.getElementsByTagName("country").item(i).getTextContent();
+                int age = Integer.parseInt(doc.getElementsByTagName("age").item(i).getTextContent());
                 Employee emp = new Employee(id, firstName, lastName, country, age);
                 employee.add(emp);
             }
@@ -147,16 +151,30 @@ public class Main {
         return employee;
     }
 
-    public static String readString(String fileName) throws IOException {
-        String jsonText;
-        BufferedReader reader = new BufferedReader(new FileReader(fileName));
-        jsonText = reader.readLine();
-        return jsonText;
+    public static String readString(String fileName) {
+        StringBuilder result = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            String line = reader.readLine();
+            while (line != null) {
+                result.append(line);
+                line = reader.readLine();
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+
+        }
+        return result.toString();
     }
 
-//    public static List<Employee> jsonToList(String json){
-//        List<Employee>
-//        return listFromJson;
-//    }
+    public static List<Employee> jsonToList(String json) {
+        List<Employee> employee = new ArrayList<>();
+        JsonArray jsonArray = JsonParser.parseString(json).getAsJsonArray();
+        GsonBuilder builder = new GsonBuilder();
+        for (JsonElement jsonEl : jsonArray) {
+            Employee employee1 = builder.create().fromJson(jsonEl, Employee.class);
+            employee.add(employee1);
+        }
+        return employee;
 
+    }
 }
