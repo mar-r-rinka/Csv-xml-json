@@ -1,17 +1,16 @@
 package ru.netology;
 
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Json {
+public class JsonAdapter {
     public static String readString(String fileName) {
         StringBuilder result = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
@@ -36,5 +35,13 @@ public class Json {
         }
         return employee;
 
+    }
+    public static String listToJson(List<Employee> list) {
+        GsonBuilder builder = new GsonBuilder();
+        Gson gson = builder.create();
+        Type listType = new TypeToken<List<Employee>>() {
+        }.getType();
+        String json = gson.toJson(list, listType);
+        return json;
     }
 }

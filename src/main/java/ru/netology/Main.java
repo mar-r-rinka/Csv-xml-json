@@ -16,11 +16,11 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static ru.netology.Csv.listToJson;
-import static ru.netology.Csv.parseCSV;
-import static ru.netology.Json.jsonToList;
-import static ru.netology.Json.readString;
-import static ru.netology.Xml.parseXML;
+import static ru.netology.CsvAdapter.parseCSV;
+import static ru.netology.JsonAdapter.jsonToList;
+import static ru.netology.JsonAdapter.listToJson;
+import static ru.netology.JsonAdapter.readString;
+import static ru.netology.XmlAdapter.parseXML;
 
 public class Main {
     public static void main(String[] args) {
@@ -94,8 +94,6 @@ public class Main {
 // JSON
         String json = readString("new_data.json");
         System.out.println(jsonToList(json));
-
-
     }
 
 

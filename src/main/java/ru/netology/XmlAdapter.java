@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Xml {
+public class XmlAdapter {
     public static List<Employee> parseXML(String fileXML) {
         List<Employee> employee = new ArrayList<>();
         try {
